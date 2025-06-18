@@ -31,7 +31,8 @@ h4 {
   font-size: 20px;
 }
 
-.btn-erp-primary{
+
+button,.btn-erp-primary{
   border: none;
   border-radius: 20;
   background-color: var(--background);
@@ -79,7 +80,7 @@ h4 {
   transition-duration: 0.4s;
   cursor: pointer;
 }
-.btn-erp-primary:hover,.btn-erp-warning:hover, .btn-erp-danger:hover,.btn-erp-secondary:hover{
+button:hover, .btn-erp-primary:hover,.btn-erp-warning:hover, .btn-erp-danger:hover,.btn-erp-secondary:hover{
   opacity: 0.8;
 }
 

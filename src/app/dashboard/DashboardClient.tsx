@@ -1,7 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LayoutShell from "@/app/components/LayoutShell";
 import InfoCard from "@/app/components/InfoCard";
 import DonutChart from "@/app/components/DonutChart";
@@ -25,26 +24,122 @@ const data1 = [
   { name: "Legal", value: 5 },
 ];
 
-const columns = ["No", "Product", "Category", "Total Sales"];
+//data table api real
+const columns = ["No", "Product", "Category", "Stock"];
 
-const data = Array.from({ length: 37 }, (_, i) => ({
-  No: i + 1,
-  Product: `Product ${i + 1}`,
-  Category: i % 2 === 0 ? "Electronics" : "Furniture",
-  "Total Sales": `Rp. ${(Math.random() * 1000000).toFixed(0)}`,
-}));
-
-const dummySales = [
-  { month: "Jan", value: 100 },
-  { month: "Feb", value: 120 },
-  { month: "Mar", value: 90 },
-  { month: "Apr", value: 200 },
-  { month: "May", value: 250 },
+//data other table from api
+const apidata = [
+  { name: "Joko Kendi", position: "Staff", division: "Programmer" },
+  { name: "Jaka Sembung", position: "Staff", division: "Programmer" },
+  { name: "Kim il Sung", position: "Manager", division: "Programmer" },
+  { name: "Virly Hutapea", position: "Staff", division: "Finance" },
+  { name: "Germany ngana", position: "Manager", division: "Finance" },
+  { name: "Alexander Borni", position: "Manager", division: "Accounting" },
+  { name: "Bane Sirlini", position: "Staff", division: "Accounting" },
+  { name: "Eun su hi", position: "Staff", division: "Accounting" },
+  { name: "Babacang oek", position: "Staff", division: "Accounting" },
+  { name: "Nissa baruna", position: "Staff", division: "Accounting" },
+  { name: "Boris Fernandes", position: "Manager", division: "Legal" },
+  { name: "Akamsi umami", position: "Staff", division: "Legal" },
+  { name: "Sai ihbul", position: "Staff", division: "Legal" },
+  { name: "Tongse pat", position: "Staff", division: "Legal" },
+  { name: "Cu min he", position: "Staff", division: "Legal" },
 ];
+const columns2 = ["No", "Name", "Position", "Division"];
+
+const data2 = apidata
+  .sort((a, b) => a.name.localeCompare(b.name)) // Mengurutkan berdasarkan name
+  .map((item, index) => ({
+    No: index + 1,
+    Name: item.name,
+    Position: item.position,
+    Division: item.division,
+  }));
 
 export default function DashboardPage() {
   const [isOpen, setIsOpen] = useState(false);
   const { showToast } = useToast();
+
+  //API LINE CHART - Harga Rata-rata per Kategori
+  const [linechartData, setLinechartData] = useState<
+    { month: string; value: number }[]
+  >([]);
+
+  useEffect(() => {
+    async function loadData() {
+      const res = await fetch("https://dummyjson.com/products");
+      const data = await res.json();
+
+      const grouped: Record<string, { total: number; count: number }> = {};
+
+      data.products.forEach((product: any) => {
+        const cat = product.category;
+        if (!grouped[cat]) {
+          grouped[cat] = { total: 0, count: 0 };
+        }
+
+        grouped[cat].total += product.price;
+        grouped[cat].count += 1;
+      });
+
+      const result = Object.entries(grouped).map(
+        ([category, { total, count }]) => ({
+          month: category,
+          value: parseFloat((total / count).toFixed(2)),
+        })
+      );
+
+      setLinechartData(result);
+    }
+
+    loadData();
+  }, []);
+
+  //API to Bar CHART
+  const [chartData, setChartData] = useState<
+    { label: string; value: number }[]
+  >([]);
+  useEffect(() => {
+    fetch("https://dummyjson.com/products")
+      .then((res) => res.json())
+      .then((json) => {
+        const products = json.products;
+
+        const grouped: Record<string, { total: number; count: number }> = {};
+
+        products.forEach((product: any) => {
+          const { category, rating } = product;
+          if (!grouped[category]) {
+            grouped[category] = { total: 0, count: 0 };
+          }
+          grouped[category].total += rating;
+          grouped[category].count += 1;
+        });
+
+        const averaged = Object.entries(grouped).map(([category, data]) => ({
+          label: category,
+          value: parseFloat((data.total / data.count).toFixed(2)), // rata-rata
+        }));
+
+        setChartData(averaged);
+      });
+  }, []);
+
+  //ambil data dari API untuk Tabel
+  const [data, setData] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("https://dummyjson.com/products")
+      .then((res) => res.json())
+      .then((json) => {
+        const mapped = json.products.map((product: any, index: number) => ({
+          No: index + 1,
+          Product: product.title,
+          Category: product.category,
+          Stock: product.stock,
+        }));
+        setData(mapped);
+      });
+  }, []);
 
   return (
     <LayoutShell>
@@ -83,24 +178,15 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-6">
           <div className="bg-white p-4 rounded-xl shadow-md w-full">
             <LineChartCard
-              title="Penjualan Bulanan"
-              data={dummySales}
+              title="Average Price Category"
+              data={linechartData}
               dataKeyX="month"
               dataKeyY="value"
-              unit="unit"
+              unit="USD"
             />
           </div>
           <div className="bg-white p-4 rounded-xl shadow-md w-full">
-            <BarChartCard
-              title="Penjualan per Kategori"
-              data={[
-                { label: "Elektronik", value: 450 },
-                { label: "Pakaian", value: 320 },
-                { label: "Makanan", value: 270 },
-                { label: "Minuman", value: 210 },
-              ]}
-              unit="produk"
-            />
+            <BarChartCard title="Rating Category" data={chartData} unit="⭐" />
           </div>
         </div>
       </section>
@@ -153,7 +239,20 @@ export default function DashboardPage() {
       {/* Table Section */}
       <section>
         <div className="p-6 flex flex-col gap-8">
-          <TableWithPagination title="Test" columns={columns} data={data} />
+          <TableWithPagination
+            title="Product List"
+            columns={columns}
+            data={data}
+          />
+        </div>
+      </section>
+      <section>
+        <div className="p-6 flex flex-col gap-8">
+          <TableWithPagination
+            title="Employee"
+            columns={columns2}
+            data={data2}
+          />
         </div>
       </section>
     </LayoutShell>
