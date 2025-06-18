@@ -25,6 +25,7 @@ export default function TableWithPagination({
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [openRow, setOpenRow] = useState<number | null>(null);
 
   const isSortable = (key: string) => key.toLowerCase() !== "no";
 
@@ -72,8 +73,6 @@ export default function TableWithPagination({
 
   return (
     <div className="bg-white rounded-2xl p-4 shadow w-full overflow-auto">
-      {/* Search */}
-
       {/* Title & Search */}
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         {title && (
@@ -92,51 +91,87 @@ export default function TableWithPagination({
         />
       </div>
 
-      {/* Table */}
-      <table className="w-full table-auto text-left border border-gray-200">
-        <thead>
-          <tr className="bg-nav text-white">
-            {columns.map((col) => (
-              <th
-                key={col}
-                onClick={() => requestSort(col)}
-                className={`px-4 py-3 font-semibold border-b border-gray-300 ${
-                  isSortable(col) ? "cursor-pointer" : "cursor-default"
-                }`}
-              >
-                <div className="flex items-center gap-1">
-                  {col}
-                  {isSortable(col) && sortConfig?.key === col && (
-                    <>
-                      {sortConfig.direction === "asc" ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      )}
-                    </>
-                  )}
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedData.map((row, rowIndex) => (
-            <tr
-              key={rowIndex}
-              className="hover:bg-blue-100 transition-all border-b border-gray-100"
-            >
+      {/* Desktop Table */}
+      <div className="hidden md:block">
+        <table className="w-full table-auto text-left border border-gray-200">
+          <thead>
+            <tr className="bg-nav text-white">
               {columns.map((col) => (
-                <td key={col} className="px-4 py-2 text-sm text-gray-700">
-                  {col.toLowerCase() === "no"
-                    ? startIndex + rowIndex + 1
-                    : row[col]}
-                </td>
+                <th
+                  key={col}
+                  onClick={() => requestSort(col)}
+                  className={`px-4 py-3 font-semibold border-b border-gray-300 ${
+                    isSortable(col) ? "cursor-pointer" : "cursor-default"
+                  }`}
+                >
+                  <div className="flex items-center gap-1">
+                    {col}
+                    {isSortable(col) && sortConfig?.key === col && (
+                      <>
+                        {sortConfig.direction === "asc" ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </>
+                    )}
+                  </div>
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {paginatedData.map((row, rowIndex) => (
+              <tr
+                key={rowIndex}
+                className="hover:bg-blue-100 transition-all border-b border-gray-100"
+              >
+                {columns.map((col) => (
+                  <td key={col} className="px-4 py-2 text-sm text-gray-700">
+                    {col.toLowerCase() === "no"
+                      ? startIndex + rowIndex + 1
+                      : row[col]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Accordion */}
+      <div className="block md:hidden space-y-2">
+        {paginatedData.map((row, i) => (
+          <div
+            key={i}
+            className="border rounded-xl p-4 bg-white shadow-md"
+            onClick={() => setOpenRow(openRow === i ? null : i)}
+          >
+            <div className="flex justify-between items-center">
+              <div className="font-semibold text-[#02437B]">
+                {row[columns[1]]}
+              </div>
+              <button className="text-sm text-blue-500">
+                {openRow === i ? "Close" : "Detail"}
+              </button>
+            </div>
+
+            {openRow === i && (
+              <div className="mt-2 text-sm text-gray-700 space-y-1">
+                {columns.map(
+                  (col, j) =>
+                    col !== "No" && (
+                      <div key={j}>
+                        <span className="font-medium">{col}: </span>
+                        {row[col]}
+                      </div>
+                    )
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between flex-wrap gap-4">

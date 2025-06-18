@@ -8,6 +8,8 @@
 :root {
   --background: #001446;
   --foreground: #02437B;
+  --danger:#990f02;
+  --warning:#E49B0F;
   --color-white: #fff;
   --box-color: #D8E9F0;
 }
@@ -29,7 +31,7 @@ h4 {
   font-size: 20px;
 }
 
-button{
+.btn-erp-primary{
   border: none;
   border-radius: 20;
   background-color: var(--background);
@@ -41,8 +43,44 @@ button{
   transition-duration: 0.4s;
   cursor: pointer;
 }
-button:hover{
+.btn-erp-secondary{
+  border: none;
+  border-radius: 20;
   background-color: var(--foreground);
+  color: var(--color-white);
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+.btn-erp-danger{
+  border: none;
+  border-radius: 20;
+  background-color: var(--danger);
+  color: var(--color-white);
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+.btn-erp-warning{
+  border: none;
+  border-radius: 20;
+  background-color: var(--warning);
+  color: var(--color-white);
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+.btn-erp-primary:hover,.btn-erp-warning:hover, .btn-erp-danger:hover,.btn-erp-secondary:hover{
+  opacity: 0.8;
 }
 
 

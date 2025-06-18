@@ -18,7 +18,7 @@ export default function Topbar() {
           .replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <header className="h-16 w-full bg-nav text-white flex items-center justify-between px-4 md:px-6 relative z-10">
+    <header className="sticky top-0 z-30 h-16 w-full bg-nav text-white flex items-center justify-between px-4 md:px-6 shadow-sm">
       {/* Judul halaman */}
       <h2 className="text-base md:text-lg font-semibold">{pageTitle}</h2>
 
