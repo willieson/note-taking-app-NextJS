@@ -76,13 +76,6 @@ button:hover, .btn-erp-primary:hover,.btn-erp-warning:hover, .btn-erp-danger:hov
 
 
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
