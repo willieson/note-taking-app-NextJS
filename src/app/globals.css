@@ -14,7 +14,9 @@
   --box-color: #D8E9F0;
 }
 
-
+a {
+  @apply text-blue-600 underline hover:text-blue-800;
+}
 
 button,.btn-erp-primary{
   border: none;

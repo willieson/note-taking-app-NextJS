@@ -152,7 +152,11 @@ export default function TableWithPagination({
                 {row[columns[1]]}
               </div>
               <button className="text-sm text-blue-500">
-                {openRow === i ? "Close" : "Detail"}
+                {openRow === i ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
               </button>
             </div>
 
