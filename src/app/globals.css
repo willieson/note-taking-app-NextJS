@@ -14,9 +14,13 @@
   --box-color: #D8E9F0;
 }
 
-a {
-  @apply text-blue-600 underline hover:text-blue-800;
+button:disabled {
+  background-color: #d1d5db; /* Tailwind: gray-300 */
+  color: #6b7280; /* Tailwind: gray-500 */
+  cursor: not-allowed;
+  pointer-events: none;
 }
+
 
 button,.btn-erp-primary{
   border: none;

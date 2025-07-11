@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
 
 export default function Login() {
   const [show, setShow] = useState(false);
@@ -15,14 +16,20 @@ export default function Login() {
             </div>
             <div className="columns-1">
               <p>
-                Don't have an account? <a href="#">Sign Up</a>
+                Don't have an account?{" "}
+                <Link
+                  href="/signup"
+                  className="text-blue-600 hover:text-blue-800 underline transition-colors"
+                >
+                  Sign Up
+                </Link>
               </p>
             </div>
 
             <div className="columns-1 mt-4">
               <p className="text-blue-600">Mail</p>
               <input
-                className="px-2 border-2 border-solid border-blue-600 rounded-xl w-full h-10"
+                className="px-2 border-2 border-solid border-blue-600 rounded-full w-full h-10"
                 type="mail"
                 placeholder="mail@mail.com"
               />
@@ -32,9 +39,9 @@ export default function Login() {
 
               <div className="relative w-full">
                 <input
-                  className="px-3 pr-10 border-2 border-solid border-blue-600 rounded-xl w-full h-10 bg-blue-100"
+                  className="px-3 pr-10 border-2 border-solid border-blue-600 rounded-full w-full h-10 bg-blue-100"
                   type={show ? "text" : "password"}
-                  placeholder="********"
+                  placeholder="●●●●●●●●●●"
                 />
                 <button
                   type="button"
