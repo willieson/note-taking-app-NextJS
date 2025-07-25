@@ -90,6 +90,12 @@ proses rendering halaman dilakukan di sisi klien.
 
 <h1><b>##Setup</b></h1>
 
+Required
+`NodeJS v24.4.1` ++
+
+`npx & npm v11.4.2`++
+
+
 copy project `git clone https://github.com/willieson/note-taking-app-NextJS.git`
 
 masuk direktori `cd note-taking-app-NextJS`
