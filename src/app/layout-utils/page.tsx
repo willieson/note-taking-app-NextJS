@@ -1,10 +1,10 @@
 import { Metadata } from "next";
-import DashboardClient from "./DashboardClient";
+import LayPage from "./layutils";
 
 export const metadata: Metadata = {
-  title: "Note Taking - Dashboard",
+  title: "ERP System - Dashboard",
 };
 
 export default function DashboardPage() {
-  return <DashboardClient />;
+  return <LayPage />;
 }

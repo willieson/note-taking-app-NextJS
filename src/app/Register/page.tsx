@@ -1,40 +1,42 @@
 "use client";
-import { useState } from "react";
-import { useEffect } from "react";
+
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useToast } from "../components/ToastProvider";
+import { useRouter } from "next/navigation";
 
 export default function Register() {
+  const { showToast } = useToast();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [showPass, setShowPass] = useState(false);
-  const [showConfPass, setShowConfPass] = useState(false);
-  const [agree, setAgree] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Error states
+  const [showPass, setShowPass] = useState(false);
+  const [showConfPass, setShowConfPass] = useState(false);
+
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
+  const router = useRouter();
+
   const isEmailValid = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // Tambahkan useEffect ini di dalam komponen
   useEffect(() => {
-    // Jika confirmPassword tidak kosong, validasi ulang saat password berubah
     if (confirmPassword) {
       validateConfirmPassword();
     }
   }, [password, confirmPassword]);
+
   const validateName = () => {
-    if (name.trim() === "") {
-      setNameError("Name is required");
-    } else {
-      setNameError("");
-    }
+    setNameError(name.trim() === "" ? "Name is required" : "");
   };
 
   const validateEmail = () => {
@@ -48,11 +50,7 @@ export default function Register() {
   };
 
   const validatePassword = () => {
-    if (password.trim() === "") {
-      setPasswordError("Password is required");
-    } else {
-      setPasswordError("");
-    }
+    setPasswordError(password.trim() === "" ? "Password is required" : "");
   };
 
   const validateConfirmPassword = () => {
@@ -75,6 +73,44 @@ export default function Register() {
     password !== "" &&
     confirmPassword !== "" &&
     agree;
+
+  const handleSubmit = async () => {
+    validateName();
+    validateEmail();
+    validatePassword();
+    validateConfirmPassword();
+
+    if (!isFormValid) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showToast("Registration successful!", "success");
+        setName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setAgree(false);
+        // Tunggu 4 detik (durasi toast), baru redirect
+        await new Promise((resolve) => setTimeout(resolve, 4000));
+        router.push("/Login");
+      } else {
+        showToast(data.message || "Registration failed.", "error");
+      }
+    } catch (err) {
+      showToast("Server error occurred.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[var(--color-box)] text-[var(--background)] flex p-4 justify-center">
@@ -146,18 +182,9 @@ export default function Register() {
                 onBlur={validatePassword}
               />
               <button
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  boxShadow: "none",
-                  padding: 0,
-                  margin: 0,
-                  color: "#2563eb",
-                }}
                 type="button"
                 onClick={() => setShowPass((prev) => !prev)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600"
-                tabIndex={-1}
               >
                 {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -182,18 +209,9 @@ export default function Register() {
                 onBlur={validateConfirmPassword}
               />
               <button
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  boxShadow: "none",
-                  padding: 0,
-                  margin: 0,
-                  color: "#2563eb",
-                }}
                 type="button"
                 onClick={() => setShowConfPass((prev) => !prev)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600"
-                tabIndex={-1}
               >
                 {showConfPass ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -233,17 +251,18 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Button */}
+          {/* Submit Button */}
           <div className="columns-1 mt-4">
             <button
-              disabled={!isFormValid}
+              disabled={!isFormValid || loading}
+              onClick={handleSubmit}
               className={`w-full rounded-full h-10 ${
-                isFormValid
+                isFormValid && !loading
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "bg-gray-300 text-gray-600 cursor-not-allowed"
               }`}
             >
-              Sign Up
+              {loading ? "Processing..." : "Sign Up"}
             </button>
           </div>
         </div>

@@ -2,21 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  DollarSign,
-  Users,
-  Warehouse,
-} from "lucide-react";
+import { LayoutDashboard, NotebookPen } from "lucide-react";
 import clsx from "clsx";
 
 const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Sales", href: "/Sales", icon: ShoppingCart },
-  { name: "Finance", href: "/Finance", icon: DollarSign },
-  { name: "HR", href: "/HR", icon: Users },
-  { name: "Warehouse", href: "/Warehouse", icon: Warehouse },
+  { name: "Notes", href: "/notes", icon: NotebookPen },
 ];
 
 export default function BottomNav() {

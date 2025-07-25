@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<b>Project Struktur</b>
 
-## Getting Started
+<li>prisma/schema.prisma -- Skema database</li>
+<li>components -- Template fitur-fitur reusabel</li>
+<li>lib -- setting library autentikasi, database dll</li>
+<li>utils -- untuk utility seperti jwt token</li>
+<li>api -- Server side Routes</li>
 
-First, run the development server:
+<b>Rancangan Struktur Database dan Alasan</b>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+<img src="https://github.com/willieson/note-taking-app-Laravel/blob/main/ERD_Database.png" width = "400"/>
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+<li>users : Default dari Laravel Breeze. Menyimpan data akun pengguna.</li>
+<li>notes : Menyimpan catatan milik user. Memiliki kolom is_public untuk publikasi.</li>
+<li>note_shares : Menyimpan catatan yang dibagikan ke user lain.</li>
+<li>comments : Komentar untuk catatan publik. Disimpan bersama info user & note.</li>
+</br>
+<b>Relasi antar tabel</b>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<li>users ⟶ notes (1-to-many)</li>
+<li>users ⟶ comments (1-to-many)</li>
+<li>notes ⟶ comments (1-to-many)</li>
+<li>notes ⟷ users melalui note_shares (many-to-many)</li>
+</br>
+<b>Alasan Struktur:</b>
+ <p>   Menggunakan note_shares sebagai tabel pivot agar bisa kontrol siapa yang mendapat akses.
+    Field is_public pada notes memudahkan memisahkan mana catatan publik dan privat.
+    comments hanya diaktifkan untuk catatan publik.</p>
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+<b>Flow Process Aplikasi</b>
+a. User Flow:
+-> User login/daftar (validasi)
+-> Masuk Dashboard (autentikasi Login)
+Dashboard Menampilkan Notes semua user yang dapat dilihat public
+ketika diklik salah satu notes, user dapat memberikan komentar terhadap notes tersebut
 
-## Learn More
+-> Menu Notes
+Menampilkan Notes User dan Notes yang dishared ke user
++Create Note -> untuk user membuat notes baru
++button Update -> merubah Notes user yang sudah ada, title/content/ Public true:false
++button Delete -> Menghapus Notes User yang sudah ada
++Button Share -> Membagikan Notes User Ke User lain
 
-To learn more about Next.js, take a look at the following resources:
+-> Logout
+Mengakhiri Sesi Login (autentikasi)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+b. Backend Flow:
+/api/comments -> Mengatur logika komentar user terhadap notes public
+/api/login -> Mengatur logika login untuk validasi dan autentikasi user
+/api/logout -> mengatur logika Logout autentikasi user
+/api/me -> untuk menangkap id user yang login untuk digunakan seperti menampilkan data user (akses validasi)
+/api/notes -> mengatur logika notes management
+/api/register -> mengatur logika pendaftaran user baru
+/api/users -> menampung user list yang sudah terdaftar
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+<b>Penggunaan SSR, CSR, dan SSG</b>
+CSR (Client-Side Rendering): Mayoritas halaman menggunakan CSR dengan React Hooks (e.g. useEffect, useState) alasannya karena:
 
-## Deploy on Vercel
+<li>Data dinamis (notes, shared users)</li>
+<li>interaksi end user secara langsung (modal, button share)</li>
+SSR & SSG Tidak diimplementasikan secara langsung dalam proyek ini. 
+komunikasi database dilakukan di sisi server melalui API Routes (Next.js App Router).
+proses rendering halaman dilakukan di sisi klien.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+<b>Library/Plugin yang di pakai</b>
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<li>NextJS (App Router) : Framework utama frontend & API</li>
+<li>React : UI Rendering</li>
+<li>pg (node-postgres) : Koneksi langsung ke PostgreSQL</li>
+<li>Prisma : ORM, Relasi dan migrasi</li>
+<li>Tailwind CSS : Styling UI secara efisien dan responsif</li>
+<li>Lucide React : 	Ikon UI modern</li>
+<li>Bycrpt :  hashing password</li>
+<li>jsonwebtoken : Verifikasi token otentikasi</li>
+<li>cookie : pengelolaan cookies di sisi server/client</li>
+
+#Setup

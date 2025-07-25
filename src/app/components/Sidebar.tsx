@@ -6,10 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   LayoutDashboard,
-  ShoppingCart,
-  DollarSign,
-  Users,
-  Warehouse,
+  NotebookPen,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -22,10 +19,7 @@ interface SidebarProps {
 
 const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Sales", href: "/Sales", icon: ShoppingCart },
-  { name: "Finance", href: "/Finance", icon: DollarSign },
-  { name: "HR", href: "/HR", icon: Users },
-  { name: "Warehouse", href: "/Warehouse", icon: Warehouse },
+  { name: "Notes", href: "/notes", icon: NotebookPen },
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {

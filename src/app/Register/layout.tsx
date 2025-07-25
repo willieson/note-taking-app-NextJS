@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "ERP System - Register",
+  title: "Note Taking Apps NextJS - Register",
 };
 
 export default function LoginLayout({
