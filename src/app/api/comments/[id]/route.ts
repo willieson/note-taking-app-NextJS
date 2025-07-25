@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
 // Ambil komentar berdasarkan note_id
-export async function GET(req: Request, context: { params: { id: string } }) {
+export async function GET(req: Request, context: { params: { id: bigint } }) {
   const noteId = context.params.id;
 
   try {
