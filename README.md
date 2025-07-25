@@ -8,7 +8,7 @@
 
 <b>Rancangan Struktur Database dan Alasan</b>
 
-<img src="https://github.com/willieson/note-taking-app-Laravel/blob/main/ERD_Database.png" width = "400"/>
+<img src="https://github.com/willieson/note-taking-app-Laravel/blob/main/ERD_Database_pgs.png" width = "400"/>
 
 <li>users : Default dari Laravel Breeze. Menyimpan data akun pengguna.</li>
 <li>notes : Menyimpan catatan milik user. Memiliki kolom is_public untuk publikasi.</li>
@@ -28,29 +28,43 @@
     comments hanya diaktifkan untuk catatan publik.</p>
 
 <b>Flow Process Aplikasi</b>
+
 a. User Flow:
 -> User login/daftar (validasi)
+
 -> Masuk Dashboard (autentikasi Login)
+
 Dashboard Menampilkan Notes semua user yang dapat dilihat public
 ketika diklik salah satu notes, user dapat memberikan komentar terhadap notes tersebut
 
 -> Menu Notes
+
 Menampilkan Notes User dan Notes yang dishared ke user
 +Create Note -> untuk user membuat notes baru
+
 +button Update -> merubah Notes user yang sudah ada, title/content/ Public true:false
+
 +button Delete -> Menghapus Notes User yang sudah ada
+
 +Button Share -> Membagikan Notes User Ke User lain
 
 -> Logout
+
 Mengakhiri Sesi Login (autentikasi)
 
 b. Backend Flow:
 /api/comments -> Mengatur logika komentar user terhadap notes public
+
 /api/login -> Mengatur logika login untuk validasi dan autentikasi user
+
 /api/logout -> mengatur logika Logout autentikasi user
+
 /api/me -> untuk menangkap id user yang login untuk digunakan seperti menampilkan data user (akses validasi)
+
 /api/notes -> mengatur logika notes management
+
 /api/register -> mengatur logika pendaftaran user baru
+
 /api/users -> menampung user list yang sudah terdaftar
 
 <b>Penggunaan SSR, CSR, dan SSG</b>
@@ -74,4 +88,20 @@ proses rendering halaman dilakukan di sisi klien.
 <li>jsonwebtoken : Verifikasi token otentikasi</li>
 <li>cookie : pengelolaan cookies di sisi server/client</li>
 
-#Setup
+<h1><b>##Setup</b></h1>
+
+copy project `git clone https://github.com/willieson/note-taking-app-NextJS.git`
+
+masuk direktori `cd note-taking-app-NextJS`
+
+install dependencies `npm install`
+
+siapkan database
+
+setup .env `touch .env`
+
+setting database di env contoh silahkan lihat di `env.example` ini menggunakan settingan postgresql
+
+migrasi database `npx prisma migrate dev --name init`
+
+Running dev `npm run dev`
