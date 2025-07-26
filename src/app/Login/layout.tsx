@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "ERP System - Login",
+  title: "Taking Notes App - Login",
 };
 
 export default function LoginLayout({

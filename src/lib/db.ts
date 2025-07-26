@@ -1,6 +1,6 @@
 import { extractErrorMessage } from "@/helper/error";
 import { Pool, QueryResult } from "pg";
-import { Buffer } from "buffer";
+import fs from "fs";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -8,20 +8,18 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is not set. Please check your .env.local file.");
 }
 
-// Ambil CA dari ENV, decode base64 ke string
-const sslCA = process.env.DATABASE_SSL_CA
-  ? Buffer.from(process.env.DATABASE_SSL_CA, "base64").toString("utf-8")
-  : undefined;
+// Gunakan sertifikat CA dari file atau variabel lingkungan
+const caCert = process.env.DATABASE_SSL_CA
+  ? Buffer.from(process.env.DATABASE_SSL_CA, "base64").toString("ascii")
+  : fs.readFileSync("../certif/ca.pem").toString();
 
-const pool = new Pool({
-  connectionString,
-  ssl: process.env.NODE_ENV === "production" && sslCA
-    ? {
-        ca: sslCA,
-        rejectUnauthorized: true, // Gunakan true agar validasi CA dilakukan
-      }
-    : false,
-});
+  const pool = new Pool({
+    connectionString,
+    ssl: {
+      rejectUnauthorized: true, // Verifikasi sertifikat server
+      ca: caCert, // Sertifikat CA Aiven
+    },
+  });
 
 
 pool.on("error", (err: Error) => {
@@ -30,6 +28,8 @@ pool.on("error", (err: Error) => {
 });
 
 console.log("PostgreSQL Pool initialized successfully.");
+
+export default pool;
 
 // Definisi tipe untuk hasil query
 interface User {
