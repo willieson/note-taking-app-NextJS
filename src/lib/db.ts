@@ -10,17 +10,17 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is not set. Please check your .env.local file.");
 }
 
-// Konfigurasi SSL berdasarkan lingkungan
+// Coba path absolut relatif dari root proyek
 const sslConfig =
   process.env.NODE_ENV === "production"
     ? {
-        ca: readFileSync(resolve(__dirname, "../config/ca.pem")).toString(),
-        rejectUnauthorized: true, // Memastikan koneksi aman dengan CA
+        ca: readFileSync(resolve(process.cwd(), "config/ca.pem")).toString(),
+        rejectUnauthorized: true,
       }
     : false;
 
 const pool = new Pool({
-  connectionString: connectionString,
+  connectionString,
   ssl: sslConfig,
 });
 
