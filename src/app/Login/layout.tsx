@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Note Taking Apps NextJS - Login",
+  title: "ERP System - Login",
 };
 
 export default function LoginLayout({

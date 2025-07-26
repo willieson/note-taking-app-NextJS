@@ -1,7 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utlis";
-
 interface ToastProps {
   message: string;
   type: "success" | "error" | "info";

@@ -1,51 +1,79 @@
 "use client";
-import { useEffect, useState } from "react";
+
 import LayoutShell from "@/app/components/LayoutShell";
 import InfoCard from "@/app/components/InfoCard";
+import { useToast } from "@/app/components/ToastProvider";
+import { useCallback, useEffect, useState } from "react";
+import { extractErrorMessage } from "@/helper/error";
 import Link from "next/link";
 
+interface PublicNotes {
+  id: string;
+  title: string;
+  content: string;
+  name: string;
+}
+
 export default function DashboardPage() {
-  const [publicNotes, setPublicNotes] = useState<
-    { id: number; title: string; content: string; name: string }[]
-  >([]);
+  const { showToast } = useToast();
+  const [notes, setNotes] = useState<PublicNotes[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPublicNotes = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/notes/public");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal mengambil catatan publik");
+      }
+
+      if (!Array.isArray(data)) {
+        throw new Error("Data dari API bukan array");
+      }
+
+      const ids = new Set(data.map((note: PublicNotes) => note.id));
+      if (ids.size !== data.length) {
+        console.warn("Terdapat duplikat ID dalam data:", data);
+      }
+
+      setNotes(data);
+    } catch (error: unknown) {
+      const message = extractErrorMessage(error);
+      showToast(`Terjadi kesalahan: ${message}`, "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
 
   useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const res = await fetch("/api/notes/public");
-        if (res.ok) {
-          const data = await res.json();
-          setPublicNotes(data);
-        }
-      } catch (err) {
-        console.error("Gagal mengambil notes publik:", err);
-      }
-    };
-
-    fetchNotes();
-  }, []);
+    fetchPublicNotes();
+  }, [fetchPublicNotes]);
 
   return (
     <LayoutShell>
-      {/* Notes Publik */}
-      <section className="mb-6">
-        <h3 className="text-lg font-semibold mb-3">Catatan Publik</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {publicNotes.length === 0 ? (
-            <p className="text-sm text-gray-500">Belum ada catatan publik.</p>
-          ) : (
-            publicNotes.map((note) => (
-              <Link href={`/notes/${note.id}`} key={note.id}>
-                <InfoCard
-                  title={note.title}
-                  value={note.content.slice(0, 100) + "..."}
-                  subtitle={`Oleh: ${note.name}`}
-                />
-              </Link>
-            ))
-          )}
-        </div>
-      </section>
+      {/* Info Cards */}
+
+      <h2 className="text-xl font-semibold mb-4">Public Notes</h2>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : notes.length > 0 ? (
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {notes.map((note) => (
+            <Link href={`/notes/${note.id}`} key={note.id}>
+              <InfoCard
+                title={note.title}
+                value={note.content}
+                subtitle={`by. ${note.name}`}
+              />
+            </Link>
+          ))}
+        </section>
+      ) : (
+        <p>Tidak ada notes publik yang tersedia.</p>
+      )}
     </LayoutShell>
   );
 }

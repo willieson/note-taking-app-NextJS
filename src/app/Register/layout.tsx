@@ -1,8 +1,8 @@
 export const metadata = {
-  title: "Note Taking Apps NextJS - Register",
+  title: "Taking Notes Apps - Register",
 };
 
-export default function LoginLayout({
+export default function RegisterLayout({
   children,
 }: {
   children: React.ReactNode;

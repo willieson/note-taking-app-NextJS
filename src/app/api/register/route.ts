@@ -1,43 +1,62 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Pool } from "pg";
-import bcrypt from "bcrypt";
+import { NextResponse } from "next/server";
+import { hash } from "bcrypt";
+import { db } from "@/lib/db";
+import { extractErrorMessage } from "@/helper/error";
 
-// Buat koneksi pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
 
-export async function POST(req: NextRequest) {
-  const { name, email, password } = await req.json();
-
-  if (!name || !email || !password) {
-    return NextResponse.json({ message: "All fields are required." }, { status: 400 });
-  }
-
+export async function POST(req: Request) {
   try {
-    // Cek apakah email sudah terdaftar
-    const existing = await pool.query<{ id: number }>(
-      "SELECT id FROM users WHERE email = $1",
-      [email]
-    );
-    
-    if (existing?.rowCount && existing.rowCount > 0) {
-      return NextResponse.json({ message: "Email already registered." }, { status: 409 });
+    const { name, email, password }: RegisterRequest = await req.json();
+
+    // Validasi input
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { error: "Nama, email, dan kata sandi diperlukan" },
+        { status: 400 }
+      );
     }
 
-    // Hash password
-    const hashed = await bcrypt.hash(password, 10);
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isEmailValid) {
+      return NextResponse.json(
+        { error: "Format email tidak valid" },
+        { status: 400 }
+      );
+    }
 
-    // Insert user baru
-    await pool.query(
-      `INSERT INTO users (name, email, password, created_at, updated_at)
-       VALUES ($1, $2, $3, NOW(), NOW())`,
-      [name, email, hashed]
+    // Cek apakah email sudah terdaftar
+    const existingUser = await db.findUserByEmail(email);
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "Email sudah terdaftar" },
+        { status: 409 }
+      );
+    }
+
+    // Hash kata sandi
+    const hashedPassword = await hash(password, 10);
+
+    // Simpan pengguna ke database
+    const query =
+      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, email, name";
+    const result = await db.pool.query(query, [name, email, hashedPassword]);
+
+    return NextResponse.json(
+      { message: "Registrasi berhasil", user: result.rows[0] },
+      { status: 201 }
     );
+  } catch (error: unknown) {
+    const message = extractErrorMessage(error);
+    console.error("Error during registration:", message);
 
-    return NextResponse.json({ message: "User registered successfully." }, { status: 201 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: "Server error." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Gagal melakukan registrasi: " + message },
+      { status: 500 }
+    );
   }
 }

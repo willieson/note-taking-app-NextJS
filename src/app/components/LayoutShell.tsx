@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import BottomNav from "./BottomNav";
@@ -12,11 +11,9 @@ export default function LayoutShell({
 }: {
   children: React.ReactNode;
 }) {
-  const [collapsed, setCollapsed] = useState<boolean | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const router = useRouter();
+  const [collapsed, setCollapsed] = useState<boolean | null>(null); // null artinya "belum tahu"
 
-  // Ambil sidebar setting dari localStorage
+  // Ambil nilai dari localStorage hanya di client
   useEffect(() => {
     const saved = localStorage.getItem("sidebar-collapsed");
     if (saved !== null) {
@@ -26,36 +23,15 @@ export default function LayoutShell({
     }
   }, []);
 
-  // Simpan perubahan collapse ke localStorage
+  // Simpan ke localStorage setiap kali collapsed berubah
   useEffect(() => {
     if (collapsed !== null) {
       localStorage.setItem("sidebar-collapsed", String(collapsed));
     }
   }, [collapsed]);
 
-  // Cek autentikasi
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch("/api/me");
-        if (res.status === 200) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-          router.push("/Login");
-        }
-      } catch (err) {
-        console.error("Auth check error:", err);
-        setIsAuthenticated(false);
-        router.push("/Login");
-      }
-    };
-
-    checkAuth();
-  }, [router]);
-
-  // ⏳ Jangan render apa-apa sebelum tahu status auth dan sidebar
-  if (collapsed === null || isAuthenticated === null) return null;
+  // ⏳ Jangan render apa pun sebelum tahu state-nya
+  if (collapsed === null) return null;
 
   return (
     <div className="flex">

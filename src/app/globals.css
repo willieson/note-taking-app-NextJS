@@ -70,11 +70,10 @@ button,.btn-erp-primary{
   transition-duration: 0.4s;
   cursor: pointer;
 }
-
 .btn-erp-none{
   border: none;
   border-radius: 20;
-  background-color: var(--color-white);
+  background-color: transparent;
   color: #000;
   padding: 10px 20px;
   text-align: center;
@@ -83,7 +82,7 @@ button,.btn-erp-primary{
   transition-duration: 0.4s;
   cursor: pointer;
 }
-button:hover, .btn-erp-primary:hover,.btn-erp-warning:hover, .btn-erp-danger:hover,.btn-erp-secondary:hover, .btn-erp-none{
+button:hover, .btn-erp-primary:hover,.btn-erp-warning:hover, .btn-erp-danger:hover,.btn-erp-secondary:hover{
   opacity: 0.8;
 }
 

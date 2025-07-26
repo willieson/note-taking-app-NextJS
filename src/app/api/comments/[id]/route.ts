@@ -1,85 +1,54 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+import { extractErrorMessage } from "@/helper/error";
 
-// Ambil komentar berdasarkan note_id
-export async function GET(req: Request, context: { params: { id: bigint } }) {
-  const noteId = context.params.id;
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  console.log("Handling GET request for comments of note ID:", id);
+
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
-    const result = await db.query(
-      `SELECT comments.id, comments.content, comments.created_at, users.name
-       FROM comments
-       JOIN users ON comments.user_id = users.id
-       WHERE comments.note_id = $1
-       ORDER BY comments.created_at ASC`,
-      [noteId]
-    );
-
-    return NextResponse.json(result.rows);
-  } catch (err) {
-    console.error("Gagal mengambil komentar:", err);
-    return NextResponse.json(
-      { message: "Gagal mengambil komentar" },
-      { status: 500 }
-    );
+    const comments = await db.getCommentsByNoteId(id);
+    return NextResponse.json(comments, { status: 200 });
+  } catch (error: unknown) {
+    const message = extractErrorMessage(error);
+    console.error("Error fetching comments:", message);
+    return NextResponse.json({ error: `Gagal mengambil komentar: ${message}` }, { status: 500 });
   }
 }
 
-// Tambah komentar ke note_id
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const token = cookies().get("token")?.value;
+  const { id } = await params;
+  console.log("Handling POST request for comments of note ID:", id);
 
-  if (!token) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
-  let userId: string;
-  let userName: string;
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string;
-      name: string;
-    };
-    userId = decoded.userId;
-    userName = decoded.name;
-  } catch (err) {
-    return NextResponse.json({ message: "Token tidak valid" }, { status: 401 });
-  }
-
-  const noteId = params.id;
-  const body = await req.json();
-  const content = body.content;
-
-  if (!content || content.trim() === "") {
-    return NextResponse.json(
-      { message: "Isi komentar tidak boleh kosong" },
-      { status: 400 }
-    );
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const result = await db.query(
-      `INSERT INTO comments (user_id, note_id, content)
-       VALUES ($1, $2, $3)
-       RETURNING id, content, created_at`,
-      [userId, noteId, content]
-    );
+    const { content } = await req.json();
+    if (!content || typeof content !== "string") {
+      return NextResponse.json({ error: "Content is required" }, { status: 400 });
+    }
 
-    return NextResponse.json({
-      ...result.rows[0],
-      name: userName, // langsung dari JWT
-    });
-  } catch (err) {
-    console.error("Gagal menambahkan komentar:", err);
-    return NextResponse.json(
-      { message: "Gagal menambahkan komentar" },
-      { status: 500 }
-    );
+    const newComment = await db.addComment(id, session.user.id, content);
+    return NextResponse.json(newComment, { status: 201 });
+  } catch (error: unknown) {
+    const message = extractErrorMessage(error);
+    console.error("Error adding comment:", message);
+    return NextResponse.json({ error: `Gagal menambahkan komentar: ${message}` }, { status: 500 });
   }
 }

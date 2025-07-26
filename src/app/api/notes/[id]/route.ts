@@ -1,62 +1,46 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { cookies } from "next/headers";
+import { extractErrorMessage } from "@/helper/error";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const note = await db.query(
-    `
-    SELECT notes.*, users.name 
-    FROM notes 
-    JOIN users ON notes.user_id = users.id 
-    WHERE notes.id = $1 AND is_public = true
-  `,
-    [params.id]
-  );
 
-  if (note.rows.length === 0) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
 
-  return NextResponse.json(note.rows[0]);
-}
-
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const userIdString = cookies().get("userId")?.value;
-  const userId = parseInt(userIdString || "", 10);
-  const noteId = parseInt(params.id, 10);
-
-  if (!userId) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }>}) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    // Pastikan user hanya menghapus catatan miliknya
-    const check = await db.query(
-      `SELECT id FROM notes WHERE id = $1 AND user_id = $2`,
-      [noteId, userId]
-    );
-
-    if (check.rows.length === 0) {
-      return NextResponse.json(
-        { error: "Catatan tidak ditemukan atau bukan milik Anda" },
-        { status: 404 }
-      );
+    const { id } = await params;
+    const { title, content, isPublic } = await req.json();
+    if (!title || !content) {
+      return NextResponse.json({ error: "Judul dan konten diperlukan" }, { status: 400 });
     }
 
-    await db.query(`DELETE FROM notes WHERE id = $1`, [noteId]);
+    const note = await db.updateNote(id, session.user.id, title, content, isPublic);
+    return NextResponse.json({ message: "Catatan diperbarui", note }, { status: 200 });
+  } catch (error: unknown) {
+    const message = extractErrorMessage(error);
+    console.error("Error updating note:", error);
+    return NextResponse.json({ error: `Gagal memperbarui catatan: ${message}` }, { status: 500 });
+  }
+}
 
-    return NextResponse.json({ message: "Catatan berhasil dihapus" });
-  } catch (error) {
-    console.error("❌ Gagal delete catatan:", error);
-    return NextResponse.json(
-      { error: "Gagal menghapus catatan" },
-      { status: 500 }
-    );
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await params;
+    await db.deleteNote(id, session.user.id);
+    return NextResponse.json({ message: "Catatan dihapus" }, { status: 200 });
+  } catch (error: unknown) {
+    const message = extractErrorMessage(error);
+    console.error("Error deleting note:", error);
+    return NextResponse.json({ error: `Gagal menghapus catatan: ${message}` }, { status: 500 });
   }
 }

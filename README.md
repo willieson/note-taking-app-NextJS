@@ -1,16 +1,17 @@
 <b>Project Struktur</b>
 
-<li>prisma/schema.prisma -- Skema database</li>
+<li>prisma/schema.prisma -- eloquent migrate Skema database</li>
 <li>components -- Template fitur-fitur reusabel</li>
-<li>lib -- setting library autentikasi, database dll</li>
-<li>utils -- untuk utility seperti jwt token</li>
+<li>lib -- setting library,authentikasi session database dll</li>
+<li>helper -- untuk menangani error reusable</li>
 <li>api -- Server side Routes</li>
+<li>middleware -- untuk access authentikasi</li>
 
 <b>Rancangan Struktur Database dan Alasan</b>
 
 <img src="https://github.com/willieson/note-taking-app-Laravel/blob/main/ERD_Database_pgs.png" width = "400"/>
 
-<li>users : Default dari Laravel Breeze. Menyimpan data akun pengguna.</li>
+<li>users : Menyimpan data akun pengguna.</li>
 <li>notes : Menyimpan catatan milik user. Memiliki kolom is_public untuk publikasi.</li>
 <li>note_shares : Menyimpan catatan yang dibagikan ke user lain.</li>
 <li>comments : Komentar untuk catatan publik. Disimpan bersama info user & note.</li>
@@ -32,7 +33,7 @@
 a. User Flow:
 -> User login/daftar (validasi)
 
--> Masuk Dashboard (autentikasi Login)
+-> Masuk Dashboard (autentikasi Login -> make JWT token)
 
 Dashboard Menampilkan Notes semua user yang dapat dilihat public
 ketika diklik salah satu notes, user dapat memberikan komentar terhadap notes tersebut
@@ -50,31 +51,30 @@ Menampilkan Notes User dan Notes yang dishared ke user
 
 -> Logout
 
-Mengakhiri Sesi Login (autentikasi)
+Mengakhiri Sesi Login (autentikasi --Delete Jwt token)
 
 b. Backend Flow:
+/api/auth -> Credentials User
+
 /api/comments -> Mengatur logika komentar user terhadap notes public
-
-/api/login -> Mengatur logika login untuk validasi dan autentikasi user
-
-/api/logout -> mengatur logika Logout autentikasi user
-
-/api/me -> untuk menangkap id user yang login untuk digunakan seperti menampilkan data user (akses validasi)
 
 /api/notes -> mengatur logika notes management
 
 /api/register -> mengatur logika pendaftaran user baru
 
-/api/users -> menampung user list yang sudah terdaftar
+/api/users -> menampung user list
 
 <b>Penggunaan SSR, CSR, dan SSG</b>
 CSR (Client-Side Rendering): Mayoritas halaman menggunakan CSR dengan React Hooks (e.g. useEffect, useState) alasannya karena:
 
 <li>Data dinamis (notes, shared users)</li>
 <li>interaksi end user secara langsung (modal, button share)</li>
-SSR & SSG Tidak diimplementasikan secara langsung dalam proyek ini. 
+SSR & SSG Tidak diimplementasikan secara langsung dalam proyek ini.
 komunikasi database dilakukan di sisi server melalui API Routes (Next.js App Router).
 proses rendering halaman dilakukan di sisi klien.
+Untuk /api/* adalah untuk penanganan Server Side - Fetching data dari database kirim ke client
+
+lib/db.ts -> Kumpulan Query untuk Reusable
 
 <b>Library/Plugin yang di pakai</b>
 
@@ -85,16 +85,16 @@ proses rendering halaman dilakukan di sisi klien.
 <li>Tailwind CSS : Styling UI secara efisien dan responsif</li>
 <li>Lucide React : 	Ikon UI modern</li>
 <li>Bycrpt :  hashing password</li>
-<li>jsonwebtoken : Verifikasi token otentikasi</li>
-<li>cookie : pengelolaan cookies di sisi server/client</li>
+<li>Next Auth : untuk JWT token otentikasi</li>
 
 <h1><b>##Setup</b></h1>
+
+Dibuat menggunakan NextJS 15
 
 Required
 `NodeJS v24.4.1` ++
 
 `npx & npm v11.4.2`++
-
 
 copy project `git clone https://github.com/willieson/note-taking-app-NextJS.git`
 
