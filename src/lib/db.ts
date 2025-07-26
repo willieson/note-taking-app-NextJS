@@ -1,8 +1,5 @@
 import { extractErrorMessage } from "@/helper/error";
 import { Pool, QueryResult } from "pg";
-import { readFileSync } from "fs";
-import { resolve } from "path";
-
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -10,18 +7,20 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is not set. Please check your .env.local file.");
 }
 
-// Coba path absolut relatif dari root proyek
-const sslConfig =
-  process.env.NODE_ENV === "production"
-    ? {
-        ca: readFileSync(resolve(process.cwd(), "config/ca.pem")).toString(),
-        rejectUnauthorized: true,
-      }
-    : false;
+// Ambil CA dari ENV, decode base64 ke string
+const sslCA = process.env.DATABASE_SSL_CA
+  ? Buffer.from(process.env.DATABASE_SSL_CA, "base64").toString("utf-8")
+  : undefined;
 
 const pool = new Pool({
-  connectionString,
-  ssl: sslConfig,
+  connectionString: connectionString,
+   ssl:
+    process.env.NODE_ENV === "production" && sslCA
+      ? {
+          ca: sslCA,
+          rejectUnauthorized: true,
+        }
+      : false,
 });
 
 pool.on("error", (err: Error) => {
