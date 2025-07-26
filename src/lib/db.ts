@@ -1,5 +1,8 @@
 import { extractErrorMessage } from "@/helper/error";
 import { Pool, QueryResult } from "pg";
+import { readFileSync } from "fs";
+import { resolve } from "path";
+
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -7,9 +10,18 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is not set. Please check your .env.local file.");
 }
 
+// Konfigurasi SSL berdasarkan lingkungan
+const sslConfig =
+  process.env.NODE_ENV === "production"
+    ? {
+        ca: readFileSync(resolve(__dirname, "../config/ca.pem")).toString(),
+        rejectUnauthorized: true, // Memastikan koneksi aman dengan CA
+      }
+    : false;
+
 const pool = new Pool({
   connectionString: connectionString,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+  ssl: sslConfig,
 });
 
 pool.on("error", (err: Error) => {
