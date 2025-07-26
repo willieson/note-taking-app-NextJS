@@ -1,5 +1,6 @@
 import { extractErrorMessage } from "@/helper/error";
 import { Pool, QueryResult } from "pg";
+import { Buffer } from "buffer";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -13,15 +14,15 @@ const sslCA = process.env.DATABASE_SSL_CA
   : undefined;
 
 const pool = new Pool({
-  connectionString: connectionString,
-   ssl:
-    process.env.NODE_ENV === "production" && sslCA
-      ? {
-          ca: sslCA,
-          rejectUnauthorized: true,
-        }
-      : false,
+  connectionString,
+  ssl: process.env.NODE_ENV === "production" && sslCA
+    ? {
+        ca: sslCA,
+        rejectUnauthorized: true, // Gunakan true agar validasi CA dilakukan
+      }
+    : false,
 });
+
 
 pool.on("error", (err: Error) => {
   console.error("Unexpected error on idle client", err);
