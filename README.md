@@ -108,6 +108,9 @@ setup .env `touch .env`
 
 setting database di env contoh silahkan lihat di `env.example` ini menggunakan settingan postgresql
 
-migrasi database `npx prisma migrate dev --name init`
+migrasi database 
+
+`npx prisma migrate dev --name init`
+`npx prisma migrate dev --name create_views`
 
 Running dev `npm run dev`
