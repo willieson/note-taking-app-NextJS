@@ -84,7 +84,7 @@ lib/db.ts -> Kumpulan Query untuk Reusable
 <li>Prisma : ORM, Relasi dan migrasi</li>
 <li>Tailwind CSS : Styling UI secara efisien dan responsif</li>
 <li>Lucide React : 	Ikon UI modern</li>
-<li>Bycrpt :  hashing password</li>
+<li>Bcrypt :  hashing password</li>
 <li>Next Auth : untuk JWT token otentikasi</li>
 
 <h1><b>##Setup</b></h1>
