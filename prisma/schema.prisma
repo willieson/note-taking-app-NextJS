@@ -74,3 +74,46 @@ model NoteShare {
   @@unique([note_id, shared_to_id])
   @@map("note_shares")
 }
+
+// View: view_public_notes
+model ViewPublicNote {
+  id      BigInt
+  title   String
+  content String
+  name    String
+
+  @@map("view_public_notes")
+  @@id([id])
+}
+
+// View: view_shared_notes
+model ViewSharedNote {
+  shared_note_id    BigInt
+  note_id           BigInt
+  shared_to_id      BigInt
+  shared_to_email   String
+  shared_to_name    String
+  shared_by_user_id BigInt
+  shared_by_name    String
+  shared_by_email   String
+  title             String
+  content           String
+
+  @@map("view_shared_notes")
+ @@id([shared_note_id])
+}
+
+// View: view_user_notes
+model ViewUserNote {
+  note_id     BigInt
+  user_id     BigInt
+  user_email  String
+  user_name   String
+  title       String
+  content     String
+  created_at  DateTime
+  updated_at  DateTime
+
+  @@map("view_user_notes")
+ @@id([note_id])
+}
